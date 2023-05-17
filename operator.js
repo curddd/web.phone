@@ -4,8 +4,8 @@ const fs = require('fs');
 
 // Read SSL certificate and private key files
 const sslOptions = {
-	cert: fs.readFileSync('/path/to/certificate.crt'),
-	key: fs.readFileSync('/path/to/privatekey.key')
+	cert: fs.readFileSync('/etc/ssl/chatter.today.fullchain.pem'),
+	key: fs.readFileSync('/etc/ssl/private/chatter.today.key')
 };
 
 // Create an HTTPS server
