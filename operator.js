@@ -8,6 +8,33 @@ const sslOptions = {
 	key: fs.readFileSync('/path/to/privatekey.key')
 };
 
+function generatePassword() {
+	const length = 8;
+	const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  
+	let password = '';
+	for (let i = 0; i < length; i++) {
+	  const randomIndex = Math.floor(Math.random() * characters.length);
+	  password += characters.charAt(randomIndex);
+	}
+  
+	return password;
+}
+
+//stored numbers
+let passwords = JSON.parse(fs.readFileSync('./passwords'));
+
+function saveNumber(number){
+	let pass = generatePassword();
+	passwords[pass] = number;
+	fs.writeFileSync('./passwords',JSON.stringify(passwords));
+	return pass;
+}
+
+function getNumber(password){
+	return passwords[password];
+}
+
 // Create an HTTPS server
 const server = https.createServer(sslOptions);
 
@@ -32,6 +59,18 @@ wss.on('connection', (ws) => {
 	ws.on('message', (message) => {
 		console.log(`Received message: ${message}`);
 		let parsed = JSON.parse(message);
+
+		if(parsed.type=='save_number'){
+			pass = saveNumber(my_number);
+			ws.send({type: 'saved_number', password: pass});
+		}
+
+		if(parsed.type='restore_number'){
+			if(Object.keys(passwords).includes(parsed.password)){
+				my_number = passwords[parsed.password];
+				ws.send(JSON.stringify({type: 'number_assign', number: my_number}));
+			}
+		}
 
 		if(parsed.type == 'iceCandidate'){
 			number_to_clients.get(parsed.number).send(JSON.stringify({type: 'iceCandidate', caller: my_number, data: parsed.data}));

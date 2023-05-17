@@ -4,11 +4,19 @@
   <title>WebSocket Client</title>
 </head>
 <body>
-  <h1>WebSocket Client</h1>
+  <h1>Web Phone</h1>
   <div id="messages"></div>
-  <input id="number">
+  <h3>Your Number:</h3>
+  <div id="my_number"></div>
+  <h3>Enter password to get an old number</h3>
+  <input id="password" placeholder="restore saved number">
+  <br>
+  Call:<input id="number">
   <button onclick="startCallAndCreateOffer()">Call</button>
-
+  <br>
+  <button onclick="saveNumber()">Get password for this number</button>
+  <br>
+  <button onclick="restoreNumber()">Restore number by password</button>
   <audio id="remoteAudio" autoplay></audio>
 
   <script>
@@ -17,9 +25,20 @@
 
 
   <script>
+    const myNumberDiv = document.getElementById('my_number');
+    const passDiv = document.getElementById('password');
+    const messagesDiv = document.getElementById('messages');
     const remoteAudio = document.getElementById('remoteAudio');
     const socket = new WebSocket(`ws://${window.location.hostname}:8081`);
     var my_number = null;
+
+    function restoreNumber(){
+      socket.send(JSON.encode({type: 'restore_number', password: passDiv.value}))
+    }
+
+    function saveNumber(){
+      socket.send(JSON.encode({type: 'save_number'}))
+    }
 
     
     socket.addEventListener('open', (event) => {
@@ -33,27 +52,38 @@
 
       if(parsed.type=='number_assign'){
         my_number = parsed.number;
+        myNumberDiv.innerHTML = my_number;
       }
+
+      if(parsed.type=='saved_number'){
+        passDiv.value = parsed.password;
+      }
+
 
 
       if(parsed.type=='CALL_OFFER'){
         startCallAndHandleOffer(parsed);
+        let message = "<p>Calling "+document.getElementById('number')+" ...</p>";
+        messagesDiv.innerHTML += message;
       }
 
       if(parsed.type=='CALL_ANSWER'){
-        console.log("have call answer", parsed);
         handleAnswer(parsed.caller, parsed.data);
+        let message = "<p>We are got an answer ...</p>";
+        messagesDiv.innerHTML += message;
       }
 
 
       if(parsed.type=='iceCandidate'){
         handleIceCandidate(parsed.data);
+        let message = "<p>Got ice candidate lets go ...</p>";
+        messagesDiv.innerHTML += message;
       }
 
+      if(parsed.type=='number_password'){
+        passDiv.value = parsed.password;
+      }
 
-      // Append the received message to the HTML
-      const messagesDiv = document.getElementById('messages');
-      messagesDiv.innerHTML += `<p>${message}</p>`;
     });
 
     socket.addEventListener('close', (event) => {
