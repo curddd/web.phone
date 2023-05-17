@@ -29,7 +29,7 @@
     const passDiv = document.getElementById('password');
     const messagesDiv = document.getElementById('messages');
     const remoteAudio = document.getElementById('remoteAudio');
-    const socket = new WebSocket(`ws://${window.location.hostname}:8081`);
+    const socket = new WebSocket(`wss://${window.location.hostname}:8081`);
     var my_number = null;
 
     function restoreNumber(){

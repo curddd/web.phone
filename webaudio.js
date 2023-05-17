@@ -7,6 +7,9 @@ function createPeerConnection(number) {
     // Create a new RTCPeerConnection
     peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
 
+
+
+    peerConnection.addStream(localStream);
     // Event handler for ICE candidates
     peerConnection.addEventListener('icecandidate', (event) => {
         if (event.candidate) {
@@ -36,7 +39,8 @@ var localStream;
 // Get user media for audio
 navigator.mediaDevices.getUserMedia({ audio: true })
 .then((stream) => {
-  localStream = stream;
+  const audioTrack = stream.getAudioTracks()[0];
+  localStream = new MediaStream([audioTrack]);
 })
 .catch((error) => {
   console.log('Error accessing user media:', error);
