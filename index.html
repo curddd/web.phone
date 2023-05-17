@@ -33,11 +33,11 @@
     var my_number = null;
 
     function restoreNumber(){
-      socket.send(JSON.encode({type: 'restore_number', password: passDiv.value}))
+      socket.send(JSON.stringify({type: 'restore_number', password: passDiv.value}))
     }
 
     function saveNumber(){
-      socket.send(JSON.encode({type: 'save_number'}))
+      socket.send(JSON.stringify({type: 'save_number'}))
     }
 
     

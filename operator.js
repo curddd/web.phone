@@ -62,17 +62,19 @@ wss.on('connection', (ws) => {
 
 		if(parsed.type=='save_number'){
 			pass = saveNumber(my_number);
-			ws.send({type: 'saved_number', password: pass});
+			ws.send(JSON.stringify({type: 'saved_number', password: pass}));
 		}
 
-		if(parsed.type='restore_number'){
+		if(parsed.type=='restore_number'){
 			if(Object.keys(passwords).includes(parsed.password)){
 				my_number = passwords[parsed.password];
 				ws.send(JSON.stringify({type: 'number_assign', number: my_number}));
 			}
 		}
-
 		if(parsed.type == 'iceCandidate'){
+			if(!number_to_clients.has(parsed.number)){
+				return;
+			}
 			number_to_clients.get(parsed.number).send(JSON.stringify({type: 'iceCandidate', caller: my_number, data: parsed.data}));
 		}
 
@@ -80,6 +82,7 @@ wss.on('connection', (ws) => {
 		if(parsed.type == 'CALL_OFFER'){
 			let number = parsed.number;
 			if(!number){
+console.log("NUMMER FEHLT!");
 				return;
 			}
 			if(!number_to_clients.has(number)){
@@ -90,6 +93,7 @@ wss.on('connection', (ws) => {
 			//number_to_clients.get(number).send(`INCOMING_CALL ${my_number}`);
 			calling_list.push(`${my_number} to ${number}`);
 			number_to_clients.get(number).send(JSON.stringify(parsed));
+			console.log("SENT ;)");
 		}
 
 		if(parsed.type=='CALL_ANSWER'){
