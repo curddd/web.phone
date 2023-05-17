@@ -1,7 +1,19 @@
 const WebSocket = require('ws')
+const https = require('https');
+const fs = require('fs');
 
+// Read SSL certificate and private key files
+const sslOptions = {
+	cert: fs.readFileSync('/path/to/certificate.crt'),
+	key: fs.readFileSync('/path/to/privatekey.key')
+};
 
-const wss = new WebSocket.Server({ port: 8080 });
+// Create an HTTPS server
+const server = https.createServer(sslOptions);
+
+// Create a WebSocket server
+const wss = new WebSocket.Server({ server });
+
 
 
 var number_to_clients = new Map();
@@ -74,3 +86,9 @@ function getRandomNumber() {
 	const suffix = Math.floor(Math.random() * 900000) + 100000;
 	return `${prefix}-${suffix}`;
 }
+
+
+// Start the HTTPS server
+server.listen(8081, () => {
+	console.log('Server started on port 8081');
+});
