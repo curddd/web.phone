@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>WebSocket Client</title>
+</head>
+<body>
+  <h1>WebSocket Client</h1>
+  <div id="messages"></div>
+  <input id="number">
+  <button onclick="startCallAndCreateOffer()">Call</button>
+
+  <audio id="remoteAudio" autoplay></audio>
+
+  <script>
+   
+  </script>
+
+
+  <script>
+    const remoteAudio = document.getElementById('remoteAudio');
+    const socket = new WebSocket(`ws://${window.location.hostname}:8080`);
+    var my_number = null;
+
+    
+    socket.addEventListener('open', (event) => {
+      console.log('Connected to WebSocket server');
+    });
+
+    socket.addEventListener('message', (event) => {
+      const message = event.data;
+      console.log('Received message:', message);
+      let parsed = JSON.parse(message);
+
+      if(parsed.type=='number_assign'){
+        my_number = parsed.number;
+      }
+
+
+      if(parsed.type=='CALL_OFFER'){
+        startCallAndHandleOffer(parsed);
+      }
+
+      if(parsed.type=='CALL_ANSWER'){
+        console.log("have call answer", parsed);
+        handleAnswer(parsed.caller, parsed.data);
+      }
+
+
+      if(parsed.type=='iceCandidate'){
+        handleIceCandidate(parsed.data);
+      }
+
+
+      // Append the received message to the HTML
+      const messagesDiv = document.getElementById('messages');
+      messagesDiv.innerHTML += `<p>${message}</p>`;
+    });
+
+    socket.addEventListener('close', (event) => {
+      console.log('Disconnected from WebSocket server');
+    });
+  </script>
+  <script src="webaudio.js"></script>
+</body>
+</html>
